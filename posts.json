@@ -1,0 +1,64 @@
+[
+  {
+    "id": 1,
+    "titulo": "Primeros pasos con Python",
+    "autor": {
+      "nombre": "Romina Vogeli",
+      "bio": "Analisis de datos y machine learning.",
+      "especialidad": "Data Science",
+      "redes_sociales": [
+        "@romivogeli",
+        "@romina_ml"
+      ]
+    },
+    "tags": [
+      "python",
+      "Principiantes"
+    ],
+    "estado": "publicado"
+  },
+  {
+    "id": 2,
+    "titulo": "Analizando datos con pandas",
+    "autor": {
+      "nombre": "Romina Vogeli",
+      "bio": "Analisis de datos y machine learning.",
+      "especialidad": "Data Science",
+      "redes_sociales": [
+        "@romivogeli",
+        "@romina_ml"
+      ]
+    },
+    "tags": [
+      "python",
+      "pandas",
+      "DataFrames"
+    ],
+    "estado": "borrador"
+  },
+  {
+    "id": 3,
+    "titulo": "Organizando datos con diccionarios",
+    "autor": {
+      "nombre": "Romina Vogeli",
+      "bio": "Analisis de datos y machine learning.",
+      "especialidad": "Data Science",
+      "redes_sociales": [
+        "@romivogeli",
+        "@romina_ml"
+      ]
+    },
+    "tags": [
+      "python",
+      "Diccionarios"
+    ],
+    "estado": "archivado"
+  },
+  {
+    "id": 4,
+    "titulo": "",
+    "autor": null,
+    "tags": [],
+    "estado": "revision"
+  }
+]
