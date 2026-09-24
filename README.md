@@ -1,88 +1,133 @@
-# Sistema de Blog por Consola - Version POO + JSON
+# Blog por consola - Version POO + JSON (Preentrega 6)
 
-Blog manejado desde la consola, ahora modelado con clases (`Autor`, `Post`,
-`Blog`) y con persistencia en un archivo `posts.json`: los posts que se
-crean durante la ejecucion quedan guardados y se recuperan la proxima vez
-que se corre el programa.
+Sistema de blog que se maneja desde la consola. Permite **listar, buscar,
+filtrar, crear y validar posts**, y **guardarlos en un archivo `posts.json`**
+para que se conserven entre una ejecucion y otra.
 
-Este proyecto es la evolucion del blog por funciones y modulos de las
-preentregas anteriores: la misma logica de listar, buscar, filtrar y
-validar posts, pero reorganizada en objetos en lugar de diccionarios
-sueltos.
+En esta version el sistema esta modelado con **Programacion Orientada a
+Objetos**: las entidades del blog son clases (`Autor`, `Post`, `Blog`) y los
+datos se guardan y se cargan usando el modulo `json`.
 
 ## Como ejecutarlo
 
+Requisito: Python 3.8 o superior. No usa librerias externas.
+
+Desde la carpeta raiz del proyecto (la que contiene `main.py`):
+
 ```bash
-python3 main.py
+python main.py
 ```
 
-(Tiene que ejecutarse desde esta carpeta, la que contiene `main.py`, para
-que los imports del paquete `blog` funcionen y `posts.json` se cree/lea al
-lado de `main.py`.)
+Si `posts.json` no existe, el programa lo crea solo con los posts iniciales.
 
-## Estructura
+## Estructura del proyecto
 
 ```
-main.py                <- punto de entrada, corre el bucle principal del menu
-posts.json              <- persistencia: los posts se leen y guardan aca
-blog/                    <- el paquete
-├── __init__.py          <- marca la carpeta como paquete y reexporta lo mas usado
-├── datos.py             <- constantes + guardar_posts()/cargar_posts() (persistencia JSON)
-├── modelos.py           <- clases Autor, Post y Blog
-├── validaciones.py      <- validar_post(): reglas de negocio sobre un Post
-├── operaciones.py       <- conecta el menu con el Blog (pide datos, llama a sus metodos)
-└── menu.py              <- mostrar_menu()/obtener_opcion_menu(): solo entrada/salida
+blog_consola/
+│
+├── main.py              # Punto de entrada: carga posts.json, crea el Blog y corre el menu
+├── README.md
+├── posts.json           # Persistencia: aca se guardan los posts
+│
+└── blog/                # Paquete del sistema
+    ├── __init__.py      # Marca la carpeta como paquete y reexporta lo mas usado
+    ├── datos.py         # Constantes + cargar_posts() / guardar_posts() con json
+    ├── menu.py          # Menu, lectura de la opcion y pedir_texto()
+    ├── modelos.py       # Clases Autor, Post y Blog
+    ├── operaciones.py   # Conecta cada opcion del menu con los metodos del Blog
+    └── validaciones.py  # validar_post(): reglas de negocio sobre un Post
 ```
 
-## Las clases (`blog/modelos.py`)
+## Clases principales (`blog/modelos.py`)
 
-- **`Autor`**: nombre, bio, especialidad y redes sociales de quien escribe.
-  Sabe convertirse a diccionario (`to_dict`) y reconstruirse desde uno
-  (`from_dict`), para poder guardarse en JSON.
-- **`Post`**: id, titulo, tags, estado y un **`autor`**, que es una
-  instancia de `Autor` (composicion: un post "tiene un" autor, no un
-  diccionario suelto). Tiene `mostrar()` para imprimirse por consola,
-  `es_valido()` para chequear sus propias reglas de negocio, y
-  `to_dict()`/`from_dict()` para serializarse.
-- **`Blog`**: guarda una lista de `Post` y concentra la logica del
-  sistema: `agregar_post`, `listar_posts`, `buscar_por_titulo`,
-  `filtrar_por_tag`, `validar_todos_los_posts`, y `guardar_json()` /
-  `cargar_json()` (classmethod) para la persistencia.
+```
+Blog  --tiene una lista de-->  Post  --tiene un-->  Autor
+```
 
-## Persistencia con JSON
+| Clase | Atributos | Responsabilidad |
+|---|---|---|
+| `Autor` | `nombre`, `bio`, `especialidad`, `redes_sociales` | Representa a quien escribe los posts. Reemplaza al diccionario `perfil_autor` en el funcionamiento del sistema. |
+| `Post` | `id`, `titulo`, `contenido`, `autor`, `tags`, `estado` | Representa una publicacion. Su atributo `autor` **es una instancia de `Autor`** (composicion); si se le pasa otra cosa lanza `TypeError`. Sabe mostrarse (`mostrar()`) y validarse (`es_valido()`). |
+| `Blog` | `posts` (lista de objetos `Post`) | Centraliza la logica del sistema: `obtener_posts()`, `crear_post()`, `agregar_post()`, `listar_posts()`, `buscar_por_titulo()`, `filtrar_por_tag()`, `validar_todos_los_posts()`, `to_dict()` y `guardar_json()`. |
 
-- **`blog/datos.py`** es el unico modulo que lee y escribe archivos: tiene
-  `guardar_posts(posts, ruta)` (serializa cada `Post` con `to_dict()` y
-  hace `json.dump`) y `cargar_posts(ruta)` (hace `json.load` y reconstruye
-  cada `Post` con `Post.from_dict()`).
-- Si `posts.json` todavia no existe (primera ejecucion), `cargar_posts()`
-  lo crea a partir de los datos iniciales (`posts_iniciales`) que estan en
-  el mismo archivo.
-- La clase `Blog` no sabe de archivos: sus metodos `guardar_json()` y
-  `cargar_json()` delegan directamente en las funciones de `datos.py`. Asi,
-  la logica de objetos (`modelos.py`) queda separada de la logica de
-  persistencia (`datos.py`).
-- Cada vez que se crea un post nuevo desde el menu (opcion 5), se guarda
-  al toque en `posts.json`, para no perder el post si se cierra el
-  programa.
+### Conversion entre objetos y diccionarios
 
-## Por que esta separacion
+JSON no puede guardar objetos de Python, asi que cada clase sabe convertirse:
 
-- **`datos.py`** no depende de las clases al importarse (evita un import
-  circular con `modelos.py`: recien importa `Post` adentro de
-  `cargar_posts()`, cuando la funcion se ejecuta).
-- **`modelos.py`** define el "que es cada cosa" (Autor, Post, Blog) y su
-  comportamiento propio, pero no hace `input()`/`print()` de menu ni pide
-  datos al usuario.
-- **`validaciones.py`** separa las reglas de negocio de la clase `Post`:
-  `validar_post()` recibe un post y revisa sus atributos (titulo, tags,
-  estado, autor), sin mezclarse con la logica de guardado ni de consola.
-- **`operaciones.py`** es el puente entre el menu y el `Blog`: pide los
-  datos que hagan falta por `input()` y despues delega en los metodos del
-  `Blog` (por ejemplo, `crear_post()` arma un `Post` con un `Autor` y
-  llama a `blog.agregar_post()` + `blog.guardar_json()`).
-- **`menu.py`** no sabe nada del resto: solo muestra las opciones y
-  devuelve el numero elegido.
-- **`main.py`** es el unico lugar que conoce y conecta todas las piezas:
-  carga el `Blog` desde `posts.json` al arrancar, y corre el bucle
-  `while True` del menu.
+- `Autor.to_dict()` / `Post.to_dict()`: objeto -> diccionario (para guardar).
+- `Autor.from_dict(d)` / `Post.from_dict(d)`: diccionario -> objeto (al cargar).
+- `Blog.to_dict()`: lista de posts -> lista de diccionarios.
+
+`from_dict()` controla que el diccionario este completo (claves `id`,
+`titulo`, `autor`, `tags`, `estado`) y lanza `ValueError` con un mensaje claro
+si falta algo o si algun dato tiene un tipo incorrecto.
+
+## Persistencia con JSON (`blog/datos.py`)
+
+**Carga** – `cargar_posts(ruta)`:
+
+1. Al iniciar, `main.py` llama a `cargar_posts("posts.json")`.
+2. Se lee el archivo con `json.loads()` y cada diccionario se convierte en un
+   objeto `Post` con `Post.from_dict()` (que a su vez crea el `Autor`).
+3. Con esa lista de objetos, `main.py` crea la instancia: `blog = Blog(posts)`.
+
+**Guardado** – `guardar_posts(posts, ruta)`:
+
+1. Se llama desde `Blog.guardar_json()` (opcion 6 del menu y al salir).
+2. Cada `Post` se convierte a diccionario con `to_dict()`.
+3. Se escribe la lista en `posts.json` con `json.dump()`.
+
+### Manejo de errores
+
+| Situacion | Que hace el programa |
+|---|---|
+| `posts.json` no existe | Avisa y lo crea con los posts iniciales. |
+| `posts.json` esta vacio | Avisa y usa los posts iniciales. |
+| `posts.json` tiene JSON invalido | Muestra el error (con la linea) y usa los posts iniciales, sin cerrarse. |
+| `posts.json` no contiene una lista | Avisa y usa los posts iniciales. |
+| Un post del JSON esta incompleto | Lo saltea y avisa que claves le faltan. |
+| Se intenta guardar algo que no es un objeto con `to_dict()` | Muestra un error claro y no rompe el archivo. |
+| Opcion de menu incorrecta | Avisa y vuelve a mostrar el menu. |
+| Campos vacios al crear un post | Vuelve a pedir el dato hasta que se complete. |
+| Estado invalido al crear un post | Muestra los estados validos y lo vuelve a pedir. |
+
+## Opciones del menu
+
+```
+--- MENU DEL BLOG ---
+1. Ver todos los posts
+2. Buscar por titulo
+3. Filtrar por tag
+4. Crear nuevo post
+5. Validar posts
+6. Guardar posts en JSON
+7. Salir
+```
+
+1. **Ver todos los posts**: `blog.listar_posts()`; muestra id, titulo, autor, contenido, tags y estado.
+2. **Buscar por titulo**: `blog.buscar_por_titulo()`; ignora mayusculas y minusculas.
+3. **Filtrar por tag**: `blog.filtrar_por_tag()`; ignora mayusculas y minusculas.
+4. **Crear nuevo post**: pide titulo, contenido, tags y estado; `blog.crear_post()` crea la instancia de `Post` (con un `Autor`) y la agrega a la lista del blog.
+5. **Validar posts**: `blog.validar_todos_los_posts()` aplica `validar_post()` a cada objeto. El post con id 4 esta incompleto a proposito para probar las validaciones.
+6. **Guardar posts en JSON**: `blog.guardar_json()` guarda todo en `posts.json`.
+7. **Salir**: guarda automaticamente y muestra un mensaje de despedida.
+
+## Que cambio respecto al checkpoint anterior (Modulo 5)
+
+| Antes (Modulo 5) | Ahora (Modulo 6) |
+|---|---|
+| Los posts eran diccionarios en una lista dentro de `datos.py`. | Los posts son objetos `Post`, guardados en la lista `Blog.posts`. |
+| El autor era un diccionario anidado. | El autor es un objeto `Autor` (composicion). |
+| Las funciones de `operaciones.py` recibian la lista y hacian toda la logica. | La logica esta en metodos de `Blog`; `operaciones.py` solo pide datos y llama a esos metodos. |
+| Los datos vivian solo en memoria: se perdian al cerrar. | Se cargan desde `posts.json` al iniciar y se guardan en el mismo archivo. |
+| No se podian crear posts. | Opcion 4 para crear posts y opcion 6 para guardarlos. |
+| `validar_post()` revisaba claves de un diccionario. | `validar_post()` revisa atributos de un objeto `Post`. |
+| Nuevo archivo: — | `blog/modelos.py` y `posts.json`. |
+
+## Como probarlo
+
+1. Borrar `posts.json` y ejecutar `python main.py`: se crea de nuevo.
+2. Crear un post (opcion 4) y guardarlo (opcion 6).
+3. Salir (opcion 7) y volver a ejecutar: el post nuevo sigue estando.
+4. Buscar por titulo y filtrar por tag usando mayusculas/minusculas mezcladas.
+5. Ingresar una opcion invalida (por ejemplo `9` o `abc`).

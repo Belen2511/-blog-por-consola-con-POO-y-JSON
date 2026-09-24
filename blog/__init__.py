@@ -5,8 +5,15 @@
 # Por ejemplo, en vez de escribir "from blog.modelos import Blog", alcanza
 # con "from blog import Blog".
 
-from .datos import perfil_autor, estados_post, etiquetas_blog, posts_iniciales, CLAVES_REQUERIDAS
+from .datos import perfil_autor, estados_post, etiquetas_blog, posts_iniciales, CLAVES_REQUERIDAS, cargar_posts
 from .modelos import Autor, Post, Blog
 from .validaciones import validar_post
-from .operaciones import listar_posts, buscar_por_titulo, filtrar_por_tag, validar_posts, crear_post
-from .menu import mostrar_menu, obtener_opcion_menu
+from .operaciones import (
+    listar_posts,
+    buscar_por_titulo,
+    filtrar_por_tag,
+    crear_post,
+    validar_posts,
+    guardar_posts,
+)
+from .menu import mostrar_menu, obtener_opcion_menu, pedir_texto

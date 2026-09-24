@@ -2,6 +2,7 @@
   {
     "id": 1,
     "titulo": "Primeros pasos con Python",
+    "contenido": "Instalacion de Python y primeros scripts por consola.",
     "autor": {
       "nombre": "Romina Vogeli",
       "bio": "Analisis de datos y machine learning.",
@@ -20,6 +21,7 @@
   {
     "id": 2,
     "titulo": "Analizando datos con pandas",
+    "contenido": "Como cargar un CSV en un DataFrame y hacer los primeros analisis.",
     "autor": {
       "nombre": "Romina Vogeli",
       "bio": "Analisis de datos y machine learning.",
@@ -39,6 +41,7 @@
   {
     "id": 3,
     "titulo": "Organizando datos con diccionarios",
+    "contenido": "Uso de diccionarios para modelar informacion estructurada.",
     "autor": {
       "nombre": "Romina Vogeli",
       "bio": "Analisis de datos y machine learning.",
@@ -57,6 +60,7 @@
   {
     "id": 4,
     "titulo": "",
+    "contenido": "",
     "autor": null,
     "tags": [],
     "estado": "revision"

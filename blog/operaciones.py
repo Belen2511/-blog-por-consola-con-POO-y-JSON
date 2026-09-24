@@ -5,8 +5,9 @@ Cada funcion de aca pide los datos que hagan falta por consola y despues
 delega la logica real en el objeto Blog (ver modelos.py).
 """
 
-from .datos import perfil_autor
-from .modelos import Autor, Post
+from .datos import perfil_autor, estados_post
+from .menu import pedir_texto
+from .modelos import Autor
 
 
 def listar_posts(blog):
@@ -14,12 +15,12 @@ def listar_posts(blog):
 
 
 def buscar_por_titulo(blog):
-    termino = input("Ingresa el titulo (o parte de el) a buscar: ")
+    termino = pedir_texto("Ingresa el titulo (o parte de el) a buscar: ")
     blog.buscar_por_titulo(termino)
 
 
 def filtrar_por_tag(blog):
-    tag = input("Ingresa el tag a filtrar: ")
+    tag = pedir_texto("Ingresa el tag a filtrar: ")
     blog.filtrar_por_tag(tag)
 
 
@@ -27,22 +28,39 @@ def validar_posts(blog):
     blog.validar_todos_los_posts()
 
 
-def crear_post(blog, ruta_json):
-    """Pide los datos de un post nuevo, lo agrega al blog y guarda el JSON."""
+def crear_post(blog):
+    """Pide los datos de un post nuevo y lo crea con blog.crear_post()."""
     print("\n=== NUEVO POST ===")
-    titulo = input("Titulo: ").strip()
-    tags = [t.strip() for t in input("Tags (separados por coma): ").split(",") if t.strip()]
-    estado = input("Estado (borrador/publicado/archivado): ").strip()
+    titulo = pedir_texto("Titulo: ")
+    contenido = pedir_texto("Contenido: ")
 
-    autor = Autor(
-        nombre=perfil_autor["nombre"],
-        bio=perfil_autor["bio"],
-        especialidad=perfil_autor["especialidad"],
-        redes_sociales=perfil_autor["redes_sociales"],
-    )
-    post = Post(id=blog.siguiente_id(), titulo=titulo, autor=autor, tags=tags, estado=estado)
+    tags = []
+    while not tags:
+        tags = [t.strip() for t in input("Tags (separados por coma): ").split(",") if t.strip()]
+        if not tags:
+            print("  Tenes que ingresar al menos un tag.")
 
-    blog.agregar_post(post)
-    blog.guardar_json(ruta_json)
-    print(f"\nPost creado y guardado en '{ruta_json}':")
+    estado = ""
+    while estado not in estados_post:
+        estado = pedir_texto(f"Estado ({'/'.join(estados_post)}): ").lower()
+        if estado not in estados_post:
+            print(f"  Estado invalido. Opciones: {', '.join(estados_post)}.")
+
+    # El autor es un objeto Autor (composicion), no un diccionario suelto.
+    autor = Autor.from_dict(perfil_autor)
+
+    try:
+        post = blog.crear_post(titulo, contenido, tags, estado, autor)
+    except (ValueError, TypeError) as error:
+        print(f"\n[ERROR] No se pudo crear el post: {error}.")
+        return None
+
+    print("\nPost creado (acordate de guardar con la opcion 6):")
     post.mostrar()
+    return post
+
+
+def guardar_posts(blog, ruta_json):
+    """Guarda todos los posts del blog en posts.json."""
+    if blog.guardar_json(ruta_json):
+        print(f"\nSe guardaron {len(blog.obtener_posts())} posts en '{ruta_json}'.")

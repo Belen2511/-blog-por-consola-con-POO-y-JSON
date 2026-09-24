@@ -11,7 +11,7 @@ from .datos import estados_post
 def validar_post(post):
     """
     Verifica las reglas de negocio de un post:
-      1) que el titulo no este vacio,
+      1) que el titulo y el contenido no esten vacios,
       2) que tenga al menos un tag,
       3) que el estado no este vacio y sea uno de los estados validos,
       4) que tenga un autor con nombre.
@@ -23,6 +23,9 @@ def validar_post(post):
 
     if not str(getattr(post, "titulo", "") or "").strip():
         errores.append("el titulo esta vacio")
+
+    if not str(getattr(post, "contenido", "") or "").strip():
+        errores.append("el contenido esta vacio")
 
     if not getattr(post, "tags", None):
         errores.append("no tiene tags cargados")
