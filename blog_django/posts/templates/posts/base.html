@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Blog{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'posts/css/estilos.css' %}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a class="logo" href="{% url 'inicio' %}">📝 Mi Blog</a>
+            <ul>
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'lista_posts' %}">Publicaciones</a></li>
+                <li><a href="{% url 'nuevo_post' %}">Nuevo post</a></li>
+                <li><a href="{% url 'acerca' %}">Acerca de</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
